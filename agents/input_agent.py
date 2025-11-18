@@ -1,4 +1,4 @@
-# Authors: 
+# Authors: Emily Liang 79453973, 
 # Purpose: Receives requirements from UI and sends them to CodeAgent.
 
 class InputAgent:
@@ -8,6 +8,7 @@ class InputAgent:
 	def parse_requirements(self, raw_text: str) -> dict:
 		"""
 		Parse the raw user requirements text into a structured spec.
+
 		Args: 
 			raw_text: unstructured functional reqs from UI
 		Returns:
