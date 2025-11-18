@@ -1,26 +1,35 @@
 # Authors: Emily Liang 79453973, 
-# Purpose: Ties all 4 agents together and runs them
+# Purpose: Ties all 4 agents together and runs the UI
 
 from agents.input_agent import InputAgent
 from agents.code_agent import CodeAgent
 from agents.test_agent import TestAgent
 from agents.tracking_agent import TrackingAgent
-from mcp_client import MCPClient
+from client.mcp_client import MCPClient
+from gui.ui import UI
+
+def run_workflow(reqs: dict, input_agent: InputAgent, code_agent: CodeAgent, 
+				 test_agent: TestAgent, tracking_agent: TrackingAgent) -> None:
+	"""
+	Method to execute the full workflow.
+	"""
+	# 4. Parse requirements
+
+    # 5. Generate code
+
+    # 6. Generate tests
+
+    # 7. Optionally run tests automatically
+
+    # 8. Save usage report
+	pass
 
 def main():
 	# 1. Initialize MCP client & tracker
 
     # 2️. Initialize agents
 
-    # 3️. Get requirements (from UI or CLI)
-
-    # 4️. Generate code
-
-    # 5️. Generate tests
-
-    # 6️. Optionally run tests automatically
-
-    # 7️. Save usage report
+    # 3️. Launch UI
 	pass
 
 if __name__ == '__main__':
