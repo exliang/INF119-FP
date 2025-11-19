@@ -9,6 +9,7 @@ class MCPClient:
         """
         Initialize MCPClient w/API key
         """
+        # set API key
         self.api_key = api_key or os.getenv("OPENAI_API_KEY")
         if not self.api_key:
             raise ValueError("API key not found. Please set api_key or OPENAI_API_KEY in your environment.")
@@ -30,7 +31,7 @@ class MCPClient:
             }
         """
         try:
-            response = self.client.chat.completions.create(
+            response = self.client.chat.completions.create( # request to openai
                 model=self.model,
                 messages=[
                     {"role": "system", "content": "You are an AI coding assistant."},
@@ -38,23 +39,22 @@ class MCPClient:
                 ],
             )
 
-            output = response.choices[0].message.content.strip()
-            num_tokens = response.usage.total_tokens #response.usage["total_tokens"]
+            output = response.choices[0].message.content.strip() # get response
+            num_tokens = response.usage.total_tokens # get total tokens used
         
-            return {
+            return { # return dict w model name, total tokens, & response
                 "model": self.model,
                 "tokens": num_tokens,
                 "response": output
             }
         
-        except Exception as e:
+        except Exception as e: # when calling model fails
             print(f"Error: {e}")
             return {
                 "model": self.model,
                 "tokens": 0,
                 "response": ""
             }
-
 
 # test methods
 # mcp = MCPClient()

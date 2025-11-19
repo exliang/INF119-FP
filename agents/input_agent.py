@@ -17,25 +17,25 @@ class InputAgent:
 		Returns:
 			a dict including the structured requirement text
 		"""
-		if not raw_text.strip():
+		if not raw_text.strip(): # invalid raw text from user
 			raise ValueError("Error: Requirements text is empty.")
 		
 		prompt = f"""
 		Extract the requirements from the raw user text:{raw_text}. 
-		Return in JSON format with the keys as numbered requirments 
+		Return in JSON format with the keys as numbered requirements 
 		and values as a single requirement.
 		"""
-		output = self.mcp.call_model(prompt)
-		output_text = output["response"].strip()
+		output = self.mcp.call_model(prompt) # call LLM w/prompt
+		output_text = output["response"].strip() # get response & strip it
 
 		# strip out any ``` and json
 		output_text = re.sub(r"^```json\s*", "", output_text)
 		output_text = re.sub(r"```$", "", output_text)
 
-		if not output_text:
+		if not output_text: # invalid output text from LLM
 			raise ValueError("Error: LLM returned empty requirements.")
 
-		try:
+		try: # parse JSON str into dict
 			requirements_dict = json.loads(output_text)
 		except json.JSONDecodeError:
 			raise ValueError(f"LLM output is not valid JSON: {output_text}")

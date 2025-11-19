@@ -21,7 +21,7 @@ def run_workflow(reqs: dict, input_agent: InputAgent, code_agent: CodeAgent,
 
     # 7. Optionally run tests automatically
 
-    # 8. Save usage report
+    # 8. Save usage report (only need to save one used from demo)
 	pass
 
 def main():
