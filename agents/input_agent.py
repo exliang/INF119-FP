@@ -1,17 +1,55 @@
 # Authors: Emily Liang 79453973, 
 # Purpose: Receives requirements from UI and sends them to CodeAgent.
 
+import json, re
+from client.mcp_client import MCPClient
+
 class InputAgent:
 	def __init__(self, mcp_client):
 		self.mcp = mcp_client
 
 	def parse_requirements(self, raw_text: str) -> dict:
 		"""
-		Parse the raw user requirements text into a structured spec.
+		Parse the raw user requirements text into a structured spec using LLM.
 
 		Args: 
 			raw_text: unstructured functional reqs from UI
 		Returns:
 			a dict including the structured requirement text
 		"""
-		return {"requirements": raw_text.strip()}
+		if not raw_text.strip():
+			raise ValueError("Error: Requirements text is empty.")
+		
+		prompt = f"""
+		Extract the requirements from the raw user text:{raw_text}. 
+		Return in JSON format with the keys as numbered requirments 
+		and values as a single requirement.
+		"""
+		output = self.mcp.call_model(prompt)
+		output_text = output["response"].strip()
+
+		# strip out any ``` and json
+		output_text = re.sub(r"^```json\s*", "", output_text)
+		output_text = re.sub(r"```$", "", output_text)
+
+		if not output_text:
+			raise ValueError("Error: LLM returned empty requirements.")
+
+		try:
+			requirements_dict = json.loads(output_text)
+		except json.JSONDecodeError:
+			raise ValueError(f"LLM output is not valid JSON: {output_text}")
+
+		return {"requirements": requirements_dict}
+
+# test methods (copy into main.py)
+# mcp_client = MCPClient()
+# input = InputAgent(mcp_client)
+# raw_text = """
+# The app should allow users to create an account using their email and password. 
+# Users must be able to log in and log out securely. 
+# There should be a password reset functionality via email. 
+# The main dashboard should display user statistics like number of logins and recent activity. 
+# The system should provide notifications for important events like messages or updates.
+# """
+# print(input.parse_requirements(raw_text))

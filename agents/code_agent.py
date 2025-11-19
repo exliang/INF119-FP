@@ -8,7 +8,8 @@ class CodeAgent:
 	
 	def generate_code(self, structured_reqs: dict) -> str:
 		"""
-        Calls LLM to generate code based on structured requirements.
+        Calls LLM to generate code based on structured requirements 
+		for the chosen software system.
 
         Args:
             structured_reqs: includes the parsed requirements
