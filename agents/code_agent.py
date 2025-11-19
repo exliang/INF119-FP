@@ -1,4 +1,4 @@
-# Authors: Emily Liang 79453973, 
+# Authors: Emily Liang 79453973, Kaomi Booker 85786904
 # Purpose: Generates runnable code modules based on the parsed/structured requirements
 
 import json
