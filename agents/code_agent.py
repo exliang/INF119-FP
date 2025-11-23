@@ -36,7 +36,10 @@ class CodeAgent:
 		)
 
 		mcp_output = self.mcp.call_model(prompt)
-		self.usage_tracker.record_model_call(mcp_output)
+
+		# track agent call
+		self.usage_tracker.record_agent_call("code_agent", mcp_output)
+		self.usage_tracker.save_report()
 
 		code_text = self._extract_code_from_response(mcp_output.get("response", ""))
 		if not code_text:
@@ -73,3 +76,18 @@ class CodeAgent:
 			return match.group(1).strip()
 
 		return response_text
+	
+# test methods
+# reqs = """CyberDefender is a security software application that detects and defends 
+# against cyber threats by proactively monitoring network traffic and system logs. 
+# It utilizes artificial intelligence algorithms to identify potential security breaches, 
+# malware attacks, and suspicious activities in real-time. CyberDefender provides immediate 
+# alerts and takes necessary actions to neutralize threats, ensuring the privacy and security 
+# of user data. It also includes a password manager and encryption feature to enhance data protection.
+# """
+# mcp_client = MCPClient()
+# input_agent = InputAgent(mcp_client)
+# req_dict = input_agent.parse_requirements(reqs)
+# code_agent = CodeAgent(mcp_client)
+# app_code = code_agent.generate_code(req_dict)
+# code_agent.save_code_to_file(app_code)

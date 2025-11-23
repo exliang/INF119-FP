@@ -13,11 +13,11 @@ def run_workflow(reqs: dict, input_agent: InputAgent, code_agent: CodeAgent,
 	"""
 	Method to execute the full workflow.
 	"""
-	# 4. Parse requirements
+	# 4. Parse requirements & track input agent
 
-    # 5. Generate code
+    # 5. Generate code & track code agent
 
-    # 6. Generate tests
+    # 6. Generate tests & track test agent
 
     # 7. Optionally run tests automatically
 
@@ -30,12 +30,8 @@ def main():
     # 2️. Initialize agents
 
     # 3️. Launch UI
-	mcp = MCPClient()
-	output = mcp.call_model("Write a Python function that adds two numbers.")
-	print(output)
-	tracking = TrackingAgent()
-	tracking.record_agent_call("input_agent", output) #input bc the method called is from input_agent
-	tracking.save_report()
+	pass
+
 
 if __name__ == '__main__':
 	main()

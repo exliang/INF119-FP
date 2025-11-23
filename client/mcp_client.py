@@ -1,4 +1,4 @@
-# Authors: Emily Liang 79453973, 
+# Authors: Emily Liang 79453973
 # Purpose: centralize LLM integration between agents
 
 import os

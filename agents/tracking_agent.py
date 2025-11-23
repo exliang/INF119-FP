@@ -1,4 +1,4 @@
-# Authors: Emily Liang 79453973, 
+# Authors: Emily Liang 79453973
 # Purpose: Logs API calls and token usage per model, outputs the JSON report
 
 import json
@@ -45,7 +45,7 @@ class TrackingAgent:
 		with open(self.file_path, "w") as file:
 			json.dump(self.data, file, indent=4)
 
-# test methods (copy into main.py)
+# test methods
 # mcp = MCPClient()
 # output = mcp.call_model("Write a Python function that adds two numbers.")
 # print(output)

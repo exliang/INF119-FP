@@ -1,5 +1,5 @@
 # Authors: Emily Liang 79453973, Kristen Chung 42617410
-# Purpose: Produces at least 10 test cases, aiming for ≥80% pass rate
+# Purpose: Produces at least 10 test cases, aiming for ≥ 80% pass rate
 
 import os
 import re
@@ -40,11 +40,10 @@ class TestAgent:
 			f"{code_text}\n"
 		)
 
-		# get prompt response
+		# get prompt response & track agent usage
 		mcp_output = self.mcp.call_model(prompt)
-
-		# record usage (numApicalls + totalTokens) w/ TrackingAgent
-		self.usage_tracker.record_model_call(mcp_output)
+		self.usage_tracker.record_agent_call("test_agent", mcp_output)
+		self.usage_tracker.save_report()
 
 		raw_response = mcp_output.get("response", "")
 		test_text = self._extract_code_from_response(raw_response)
@@ -54,7 +53,6 @@ class TestAgent:
 
 		# return the text
 		return test_text
-
 
 	def save_tests_to_file(self, test_text: str, file_path="generated_tests/test_generated_app.py") -> None:
 		"""
@@ -71,7 +69,6 @@ class TestAgent:
 		with open(file_path, "w", encoding="utf-8") as file:
 			file.write(test_text)
 	
-
 	def _extract_code_from_response(self, response_text: str) -> str:
 		"""
 		Standardizes the LLM's response by removing markdown fences or surrounding whitespace.
@@ -90,3 +87,10 @@ class TestAgent:
 			return match.group(1).strip()
 
 		return response_text
+	
+# test methods
+# (include test code from code_agent)
+# test_agent = TestAgent(mcp_client)
+# tests = test_agent.generate_tests(app_code)
+# test_agent.save_tests_to_file(tests)
+# RUN TEST CASES: python -m generated_tests.test_generated_app

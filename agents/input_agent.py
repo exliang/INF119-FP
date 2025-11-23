@@ -1,12 +1,13 @@
-# Authors: Emily Liang 79453973, 
+# Authors: Emily Liang 79453973
 # Purpose: Receives requirements from UI and sends them to CodeAgent.
 
 import json, re
 from client.mcp_client import MCPClient
 
 class InputAgent:
-	def __init__(self, mcp_client):
+	def __init__(self, mcp_client, usage_tracker):
 		self.mcp = mcp_client
+		self.usage_tracker = usage_tracker
 
 	def parse_requirements(self, raw_text: str) -> dict:
 		"""
@@ -25,8 +26,13 @@ class InputAgent:
 		Return in JSON format with the keys as numbered requirements 
 		and values as a single requirement.
 		"""
-		output = self.mcp.call_model(prompt) # call LLM w/prompt
-		output_text = output["response"].strip() # get response & strip it
+		mcp_output = self.mcp.call_model(prompt) # call LLM w/prompt
+		
+		# track agent call
+		self.usage_tracker.record_agent_call("input_agent", mcp_output)
+		self.usage_tracker.save_report()
+
+		output_text = mcp_output["response"].strip() # get response & strip it
 
 		# strip out any ``` and json
 		output_text = re.sub(r"^```json\s*", "", output_text)
