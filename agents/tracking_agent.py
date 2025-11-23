@@ -14,24 +14,23 @@ class TrackingAgent:
 			with open(self.file_path, "r") as file:
 				self.data = json.load(file)
 		else: # file doesn't exist, create data structure
-			self.data = {} #{"model1": {"numApiCalls": number, "totalTokens": number}, …}
+			self.data = {} #{"agent_name": {"numApiCalls": number, "totalTokens": number}, …}
 	
-	def record_model_call(self, mcp_output: dict) -> None:
+	def record_agent_call(self, agent_name: str, mcp_output: dict) -> None:
 		"""
 		Gets the MCP model response & updates the tracker.
 
 		Args:
 			mcp_output: model output returned from call_model in mcp_client
 		"""
-		# update self.data with model name, numApiCalls, & totalTokens
-		model_name = mcp_output["model"]
+		# update self.data with which agent, numApiCalls, & totalTokens
 		total_tokens = mcp_output["tokens"]
 
-		if model_name not in self.data:
-			self.data[model_name] = {"numApiCalls": 0, "totalTokens": 0}
+		if agent_name not in self.data:
+			self.data[agent_name] = {"numApiCalls": 0, "totalTokens": 0}
 		
-		self.data[model_name]["numApiCalls"] += 1
-		self.data[model_name]["totalTokens"] += total_tokens
+		self.data[agent_name]["numApiCalls"] += 1
+		self.data[agent_name]["totalTokens"] += total_tokens
 
 	def get_report(self) -> dict:
 		"""
@@ -51,6 +50,6 @@ class TrackingAgent:
 # output = mcp.call_model("Write a Python function that adds two numbers.")
 # print(output)
 # tracking = TrackingAgent()
-# tracking.record_model_call(output)
+# tracking.record_agent_call("input_agent", output) #input bc the method called is from input_agent
 # tracking.save_report()
 

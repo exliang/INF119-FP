@@ -30,7 +30,12 @@ def main():
     # 2️. Initialize agents
 
     # 3️. Launch UI
-	pass
+	mcp = MCPClient()
+	output = mcp.call_model("Write a Python function that adds two numbers.")
+	print(output)
+	tracking = TrackingAgent()
+	tracking.record_agent_call("input_agent", output) #input bc the method called is from input_agent
+	tracking.save_report()
 
 if __name__ == '__main__':
 	main()
