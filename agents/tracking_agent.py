@@ -1,5 +1,5 @@
 # Authors: Emily Liang 79453973
-# Purpose: Logs API calls and token usage per model, outputs the JSON report
+# Purpose: Logs API calls and token usage per agent, outputs the JSON report
 
 import json
 import os

@@ -35,7 +35,8 @@ class TestAgent:
 			"- Focus tests on likely behaviors from the code: threat detection, alerting, "
 			"password manager operations, and encryption/decryption.\n"
 			"- File must be self-contained and runnable.\n"
-			"- Add a top comment: '# Run with: python testing.py'\n\n"
+			"- Add a top comment: '# Run with: python testing.py'\n"
+			"- Import the module under test using: 'from generated_code import generated_app'\n\n"
 			"Module under test:\n"
 			f"{code_text}\n"
 		)
@@ -90,7 +91,7 @@ class TestAgent:
 	
 # test methods
 # (include test code from code_agent)
-# test_agent = TestAgent(mcp_client)
+# test_agent = TestAgent(mcp_client, tracker)
 # tests = test_agent.generate_tests(app_code)
 # test_agent.save_tests_to_file(tests)
 # RUN TEST CASES: python -m generated_tests.test_generated_app

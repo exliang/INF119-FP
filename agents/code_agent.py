@@ -86,8 +86,9 @@ class CodeAgent:
 # of user data. It also includes a password manager and encryption feature to enhance data protection.
 # """
 # mcp_client = MCPClient()
-# input_agent = InputAgent(mcp_client)
+# tracker = TrackingAgent()
+# input_agent = InputAgent(mcp_client, tracker)
 # req_dict = input_agent.parse_requirements(reqs)
-# code_agent = CodeAgent(mcp_client)
+# code_agent = CodeAgent(mcp_client, tracker)
 # app_code = code_agent.generate_code(req_dict)
 # code_agent.save_code_to_file(app_code)
