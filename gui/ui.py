@@ -1,19 +1,169 @@
-# Authors: Emily Liang 79453973, 
+# Authors: Emily Liang 79453973, Angie Xetey 44067973
 # Purpose: Creates a user interface for users to submit requirements for the app & receive the generated code and tests
 
+import gradio as gr 
+import subprocess 
+import sys 
+import os 
+import traceback
+import json
+
 class UI:
-	def __init__(self, input_agent, code_agent, test_agent, tracking_agent):
-		"""
-		Store references to all agents.
-		"""
-		self.input_agent = input_agent
-		self.code_agent = code_agent
-		self.test_agent = test_agent
-		self.tracking_agent = tracking_agent
-	
-	def launch_ui(self) -> None:
-		"""
-		Method to launch the UI for user interaction.
-		"""
-		#Tkinter or Gradio
-		pass
+    def __init__(self, input_agent, code_agent, test_agent, tracking_agent):
+        """
+        Store references to all agents.
+        """
+        self.input_agent = input_agent
+        self.code_agent = code_agent
+        self.test_agent = test_agent 
+        self.tracking_agent = tracking_agent
+    
+    def launch_ui(self) -> None:
+        """
+        Method to launch the UI for user interaction.
+        """
+        def cyber_defender_pipeline(requirements_text):
+
+            try:
+
+                # takes input agent and converts into structured requirements
+                structured = self.input_agent.parse_requirements(requirements_text)
+
+                # display requirements cleanly/nicely 
+                structured_json = json.dumps(structured, indent=4)
+
+                # takes code agent and generates code module 
+                code_text = self.code_agent.generate_code(structured)
+                self.code_agent.save_code_to_file(code_text)
+
+                # takes test agent to generate test file 
+                test_file_text = self.test_agent.generate_tests(code_text)
+                self.test_agent.save_tests_to_file(test_file_text)
+
+                # runs tests with python command in terminal "python -m generated_tests.test_generated_app"
+                cmd = [
+                    sys.executable,
+                    "-m",
+                    "generated_tests.test_generated_app"
+                ]
+
+                process = subprocess.Popen(
+                    cmd,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    text=True
+                )
+
+                stdout, stderr = process.communicate()
+
+                test_output =  stdout + "\n" + stderr
+
+                # counts the number of passed tests 
+                passed = test_output.count("ok")
+                failed = test_output.count("FAIL") + test_output.count("ERROR")
+                total = passed + failed
+
+                summary_md = f"""
+                            ###  Test Summary  
+                            - **Total tests:** {total}  
+                            - **Passed:** {passed}  
+                            - **Failed:** {failed}  
+                            - **Status:** {"Pass threshold met (≥8)" if passed >= 8 else "Not enough passing tests"}  
+                            """
+
+                # creating tracking report 
+                tracking_report = json.dumps(
+                    self.tracking_agent.get_report(),
+                    indent=4 
+                )
+
+                return (
+                    structured_json,
+                    code_text,
+                    test_file_text,
+                    summary_md,
+                    test_output,
+                    tracking_report
+                )
+            
+            except Exception as e:
+                return (
+                    "", "", "", 
+                    " Error occurred",
+                    traceback.format_exc(), ""
+                    )    
+
+        # used a Gradio interface (simpler to implement)
+
+        with gr.Blocks(title="Cyber Defender") as demo:
+
+            gr.Markdown(
+                 """
+# Cyber Defender
+### Automated Secure Code Generator, Tester & Tracking Suite
+
+CyberDefender is an intelligent security software assistant that:
+
+- **Monitors network traffic & system logs**  
+- **Uses AI to detect cyber threats in real time**  
+- **Identifies breaches, malware, & suspicious activity**  
+- **Takes immediate defensive actions**  
+- **Includes password management & encryption features**  
+- Auto-generates secure code and 10+ test cases  
+- Tracks model usage for transparency  
+
+Provide your system requirements in the first tab to begin the CyberDefender workflow.
+    """
+            )    
+
+            with gr.Tabs():
+
+                # TAB 1 - REQUIREMENTS INPUT 
+                with gr.Tab("Requirements"):
+                    gr.Markdown("### Enter functional requirements:")
+                    requirements_box = gr.Textbox(
+                            lines=10,
+                            label="Requirements",
+                            placeholder="Describe the system you want to build..."
+                        )
+                    run_button = gr.Button(" Run Cyber Defender")
+
+                # TAB 2 - PARSING REQUIREMENTS
+                with gr.Tab("Parsed Output"):
+                    gr.Markdown("### Structured Requirements")
+                    out_structured = gr.Code()
+
+                # TAB 3 - GENERATED CODE
+                with gr.Tab("Generated Code"):
+                    gr.Markdown("### Code Generated by Agent")
+                    out_code = gr.Code()
+
+                # TAB 4 - GENERATED TESTS
+                with gr.Tab("Generated Tests"):
+                    gr.Markdown("### Auto-Generated Test Cases")
+                    out_tests = gr.Code()
+
+                # TAB 5 - TEST RESULTS
+                with gr.Tab("Test Results"):
+                    out_summary = gr.Markdown("")
+                    out_results = gr.Textbox(label="Full Test Output", lines=15)
+
+                # TAB 6 - TRACKING REPORT 
+                with gr.Tab("Tracking Report"):
+                    gr.Markdown("### Usage Report")
+                    out_tracking = gr.Code()
+
+            run_button.click(
+                cyber_defender_pipeline,
+                inputs=[requirements_box],
+                outputs=[
+                    out_structured,
+                    out_code,
+                    out_tests,
+                    out_summary,
+                    out_results,
+                    out_tracking,
+                ],
+            )
+
+        demo.launch()
