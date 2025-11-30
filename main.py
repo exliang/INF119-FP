@@ -7,7 +7,7 @@ from agents.test_agent import TestAgent
 from agents.tracking_agent import TrackingAgent
 from client.mcp_client import MCPClient
 from gui.ui import UI
-import sys, subprocess
+import sys, subprocess, re
 
 def run_workflow(reqs: str, input_agent: InputAgent, code_agent: CodeAgent, 
                  test_agent: TestAgent, tracking_agent: TrackingAgent) -> dict:
@@ -26,18 +26,46 @@ def run_workflow(reqs: str, input_agent: InputAgent, code_agent: CodeAgent,
     generated_tests = test_agent.generate_tests(generated_code)
     
 	# Run tests
-    cmd = ["python", "-m", "generated_tests.test_generated_app"]
-    process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    cmd = ["python3", "-m", "generated_tests.test_generated_app"]
+    process = subprocess.Popen(
+        cmd,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True
+    )
+
     stdout, stderr = process.communicate()
     test_output = stdout + "\n" + stderr
-    passed = test_output.count(".")
-    failed = test_output.count("FAIL") + test_output.count("ERROR")
-    total = passed + failed
+
+    # Extract total tests in test suite
+    match = re.search(r"Ran (\d+) tests?", test_output)
+    total = int(match.group(1)) if match else 0
+
+    # Extracts failures and errors from test suite
+    failed = 0
+    errors = 0
+
+    fail_summary = re.search(r"FAILED \((.*?)\)", test_output)
+    if fail_summary:
+        text = fail_summary.group(1)
+
+        fail_match = re.search(r"failures=(\d+)", text)
+        if fail_match:
+            failed = int(fail_match.group(1))
+
+        error_match = re.search(r"errors=(\d+)", text)
+        if error_match:
+            errors = int(error_match.group(1))
+
+    # Computes the total amount of tests passed
+    passed = total - failed - errors
+
     summary_md = f"""
 	### Test Summary
 	- **Total tests:** {total}
 	- **Passed:** {passed}
 	- **Failed:** {failed}
+	- **Errors:** {errors}
 	- **Status:** {"Pass threshold met (≥8)" if passed >= 8 else "Not enough passing tests"}
 	"""
 
