@@ -86,12 +86,7 @@ def run_workflow(reqs: str, input_agent: InputAgent, code_agent: CodeAgent,
 
 
 def main():
-    reqs = """CyberDefender is a security software application that detects and defends 
-    against cyber threats by proactively monitoring network traffic and system logs. 
-    It utilizes artificial intelligence algorithms to identify potential security breaches, 
-    malware attacks, and suspicious activities in real-time. CyberDefender provides immediate 
-    alerts and takes necessary actions to neutralize threats, ensuring the privacy and security 
-    of user data. It also includes a password manager and encryption feature to enhance data protection.
+    reqs = """ 
     """
     
     # Initialize MCP server & set tools
