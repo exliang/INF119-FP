@@ -1,4 +1,4 @@
-# Authors: Emily Liang 79453973, Angie Xetey 44067973
+# Authors: Emily Liang 79453973, Angie Xetey 44067973, Kaomi Booker 85786904, Kristen Chung 42617410
 # Purpose: Ties all 4 agents together and runs the UI
 
 from agents.input_agent import InputAgent
@@ -106,11 +106,15 @@ def main():
     code_agent = CodeAgent(mcp_server, tracker)
     test_agent = TestAgent(mcp_server, tracker)
 
-	# run workflow
-    results = run_workflow(reqs, input_agent, code_agent, test_agent, tracker)
-
-    # Launch UI
-    ui = UI(results)
+	# Launch UI (workflow runs on-demand from the Gradio callback)
+    ui = UI(
+        run_workflow,
+        input_agent,
+        code_agent,
+        test_agent,
+        tracker,
+        reqs
+    )
     ui.launch_ui()
 
 
