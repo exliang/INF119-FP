@@ -1,5 +1,5 @@
 # INF119-FP
-# Team Members: 
+# Team Members (Group 10): 
 # - Emily Liang 79453973
 # - Kristen Chung 42617410
 # - Kaomi Booker 85786904

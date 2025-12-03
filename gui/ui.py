@@ -1,4 +1,4 @@
-# Authors: Emily Liang 79453973, Angie Xetey 44067973,Kaomi Booker 85786904
+# Authors: Emily Liang 79453973, Angie Xetey 44067973, Kaomi Booker 85786904
 # Purpose: Creates a user interface for users to submit requirements for the app & receive the generated code and tests
 
 import gradio as gr 

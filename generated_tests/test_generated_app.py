@@ -6,63 +6,64 @@ class TestCyberDefender(unittest.TestCase):
     def setUp(self):
         self.defender = generated_app.CyberDefender()
 
-    def test_initialization(self):
-        self.assertEqual(len(self.defender.system_logs), 0)
+    def test_initial_conditions(self):
         self.assertEqual(len(self.defender.network_traffic), 0)
+        self.assertEqual(len(self.defender.system_logs), 0)
         self.assertEqual(len(self.defender.alerts), 0)
         self.assertEqual(len(self.defender.passwords), 0)
+        self.assertTrue(self.defender.running)
 
-    def test_generate_encryption_key(self):
-        key1 = self.defender.encryption_key
-        key2 = self.defender.generate_encryption_key()  # Method call should reset the key
-        self.assertNotEqual(key1, key2)
+    def test_add_valid_password(self):
+        self.defender.add_password("email", "password123")
+        self.assertIn("email", self.defender.passwords)
+        self.assertEqual(self.defender.passwords["email"], "qbtbnqsf124")
 
-    def test_log_system_activity(self):
-        self.defender.log_system_activity("Test activity")
-        self.assertIn("Test activity", self.defender.system_logs)
+    def test_add_invalid_password_short(self):
+        with self.assertRaises(ValueError):
+            self.defender.add_password("email", "pass")
 
-    def test_detect_threats_malicious(self):
-        self.defender.detect_threats('malicious')
-        self.assertIn("Threat detected: malicious network traffic.", self.defender.alerts)
+    def test_add_invalid_password_no_digits(self):
+        with self.assertRaises(ValueError):
+            self.defender.add_password("email", "password")
 
-    def test_detect_threats_normal(self):
-        self.defender.detect_threats('normal')
-        self.assertNotIn("Threat detected: malicious network traffic.", self.defender.alerts)
+    def test_validate_password_valid(self):
+        self.assertTrue(self.defender.validate_password("password123"))
+        self.assertTrue(self.defender.validate_password("passw0rd"))
 
-    def test_neutralize_threat_logs_activity(self):
-        self.defender.detect_threats('malicious')
-        self.assertIn("Neutralizing threat.", self.defender.system_logs)
+    def test_validate_password_invalid_short(self):
+        self.assertFalse(self.defender.validate_password("short"))
 
-    def test_store_password(self):
-        self.defender.store_password("test_service", "test_password")
-        self.assertIn("test_service", self.defender.passwords)
+    def test_validate_password_invalid_no_digits(self):
+        self.assertFalse(self.defender.validate_password("password"))
 
-    def test_encryption_decryption(self):
-        self.defender.store_password("test_service", "test_password")
-        encrypted_password = self.defender.passwords["test_service"]
-        decrypted_password = self.defender.decrypt_password(encrypted_password)
-        self.assertEqual(decrypted_password, "test_password")
+    def test_encrypt_password(self):
+        encrypted = self.defender.encrypt_password("password123")
+        self.assertEqual(encrypted, "qbtbnqsf124")
 
-    def test_retrieve_nonexistent_password(self):
-        result = self.defender.retrieve_password("nonexistent_service")
-        self.assertEqual(result, "Service not found.")
+    def test_simulate_network_traffic(self):
+        traffic = self.defender.simulate_network_traffic()
+        self.assertIn("source", traffic)
+        self.assertIn("destination", traffic)
+        self.assertIn("data", traffic)
+        self.assertEqual(len(traffic["data"]), 10)
 
-    def test_retrieve_existing_password(self):
-        self.defender.store_password("test_service", "test_password")
-        result = self.defender.retrieve_password("test_service")
-        self.assertEqual(result, "test_password")
+    def test_detect_threat_no_threat(self):
+        self.defender.detect_threats({"source": "1.1.1.1", "data": "safe_data"})
+        self.assertEqual(len(self.defender.alerts), 0)
 
-    def test_monitor_network_traffic_detects_malicious(self):
-        self.defender.network_traffic = ['normal', 'malicious', 'normal', 'normal', 'malicious']
-        for traffic in self.defender.network_traffic:
-            self.defender.detect_threats(traffic)
-        self.assertGreater(len(self.defender.alerts), 0)
+    def test_detect_threat_with_threat(self):
+        self.defender.detect_threats({"source": "1.1.1.1", "data": "malware_present"})
+        self.assertEqual(len(self.defender.alerts), 1)
+        self.assertIn("Threat detected from 1.1.1.1!", self.defender.alerts)
 
-    def test_alert_user_when_threats_detected(self):
-        self.defender.detect_threats('malicious')
-        with self.assertLogs(level='INFO') as log:
-            self.defender.alert_user()
-            self.assertIn("ALERT: Threat detected: malicious network traffic.", log.output)
+    def test_neutralize_threat_logging(self):
+        with self.assertLogs('root', level='INFO') as log:
+            self.defender.neutralize_threat({"source": "2.2.2.2"})
+            self.assertIn("Neutralizing threat from 2.2.2.2.", log.output[0])
+
+    def test_stop_functionality(self):
+        self.defender.stop()
+        self.assertFalse(self.defender.running)
 
 if __name__ == '__main__':
     unittest.main()

@@ -1,76 +1,78 @@
 import json
-import random
+import logging
+import threading
 import time
-from typing import List, Dict
+import random
+import string
 
 class CyberDefender:
     def __init__(self):
-        """Initialize the CyberDefender application."""
-        self.system_logs = []
         self.network_traffic = []
+        self.system_logs = []
         self.alerts = []
         self.passwords = {}
-        self.encryption_key = self.generate_encryption_key()
+        self.running = True
+        logging.basicConfig(level=logging.INFO)
 
-    def generate_encryption_key(self) -> str:
-        """Generate a simple encryption key."""
-        return str(random.randint(100000, 999999))
-
-    def log_system_activity(self, activity: str) -> None:
-        """Log a system activity."""
-        self.system_logs.append(activity)
-
-    def monitor_network_traffic(self) -> None:
-        """Monitor network traffic and log potential threats."""
-        for _ in range(5):  # Simulating monitoring
-            traffic = random.choice(['normal', 'malicious'])
+    def monitor_traffic(self):
+        while self.running:
+            traffic = self.simulate_network_traffic()
             self.network_traffic.append(traffic)
-            self.log_system_activity(f"Network traffic: {traffic}")
             self.detect_threats(traffic)
-            time.sleep(1)
+            time.sleep(2)
 
-    def detect_threats(self, traffic: str) -> None:
-        """Detect potential threats in the network traffic."""
-        if traffic == 'malicious':
-            self.alerts.append("Threat detected: malicious network traffic.")
-            self.neutralize_threat()
+    def simulate_network_traffic(self):
+        return {
+            "source": f"{random.randint(1, 255)}.{random.randint(0, 255)}.{random.randint(0, 255)}.{random.randint(0, 255)}",
+            "destination": f"{random.randint(1, 255)}.{random.randint(0, 255)}.{random.randint(0, 255)}.{random.randint(0, 255)}",
+            "data": ''.join(random.choices(string.ascii_letters + string.digits, k=10)),
+        }
 
-    def neutralize_threat(self) -> None:
-        """Neutralize the detected threat."""
-        self.log_system_activity("Neutralizing threat.")
-        print("Threat has been neutralized!")
+    def detect_threats(self, traffic):
+        if "malware" in traffic["data"]:
+            self.alert_user(f"Threat detected from {traffic['source']}!")
+            self.neutralize_threat(traffic)
 
-    def alert_user(self) -> None:
-        """Alert the user about detected threats."""
-        for alert in self.alerts:
-            print(f"ALERT: {alert}")
+    def alert_user(self, message):
+        logging.info(message)
+        self.alerts.append(message)
 
-    def store_password(self, service: str, password: str) -> None:
-        """Store a password securely."""
-        self.passwords[service] = self.encrypt_password(password)
+    def neutralize_threat(self, traffic):
+        logging.info(f"Neutralizing threat from {traffic['source']}.")
 
-    def encrypt_password(self, password: str) -> str:
-        """Encrypt a password using a simplistic method."""
-        encrypted = ''.join(chr(ord(char) + len(self.encryption_key)) for char in password)
-        return encrypted
+    def add_password(self, name, password):
+        if not self.validate_password(password):
+            raise ValueError("Password does not meet security criteria.")
+        self.passwords[name] = self.encrypt_password(password)
 
-    def retrieve_password(self, service: str) -> str:
-        """Retrieve a stored password after decryption."""
-        if service in self.passwords:
-            return self.decrypt_password(self.passwords[service])
-        return "Service not found."
+    def validate_password(self, password):
+        return len(password) >= 8 and any(c.isdigit() for c in password)
 
-    def decrypt_password(self, encrypted: str) -> str:
-        """Decrypt an encrypted password."""
-        decrypted = ''.join(chr(ord(char) - len(self.encryption_key)) for char in encrypted)
-        return decrypted
+    def encrypt_password(self, password):
+        return ''.join(chr(ord(c) + 1) for c in password)
 
-    def run(self) -> None:
-        """Run the CyberDefender application."""
-        print("CyberDefender is running...")
-        self.monitor_network_traffic()
-        self.alert_user()
+    def stop(self):
+        self.running = False
+
+def main():
+    defender = CyberDefender()
+    
+    traffic_monitor_thread = threading.Thread(target=defender.monitor_traffic)
+    traffic_monitor_thread.start()
+
+    # Simulate adding passwords
+    try:
+        defender.add_password("email", "password123")
+    except ValueError as e:
+        logging.error(e)
+
+    time.sleep(10)  # Run for 10 seconds
+    defender.stop()
+    traffic_monitor_thread.join()
+    
+    # Save alerts to a file
+    with open('alerts.json', 'w') as f:
+        json.dump(defender.alerts, f)
 
 if __name__ == "__main__":
-    defender = CyberDefender()
-    defender.run()
+    main()
