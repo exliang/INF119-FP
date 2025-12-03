@@ -9,6 +9,7 @@
 Please install these dependencies if you haven't already to run our UI:
 - OpenAI
 - Gradio
+- Cryptography
 
 --HOW TO RUN--
 The system should be run by either providing an OpenAI API key or setting the OpenAI API key as an environment variable to run all of the LLM processes. Once that is done, users can start the application by running main.py in their local terminal. This should start the Gradio UI running on a local url, specified in the terminal. After clicking on the local url link, the application UI should appear. This application UI should ask you for the app requirements, which are inputted by the user. Since our program is tailored specifically for the CyberDefender app, the UI will only work for that specific app. Once that is done, the requirements are submitted through the "Run Cyber Defender" button at the bottom, which then conducts the processes simulatenously to generate the parsed input, the app's code, the comprehensive test suite, the test results, and the tracking report. All you have to do to view those is to click on each tab as you need it, as the program will generate items instantaneously without a buffer. 
