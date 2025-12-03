@@ -6,15 +6,8 @@ import json
 from typing import Callable
 
 class UI:
-    def __init__(
-        self,
-        workflow_runner: Callable,
-        input_agent,
-        code_agent,
-        test_agent,
-        tracking_agent,
-        default_requirements: str
-    ):
+    def __init__(self, workflow_runner: Callable, input_agent, code_agent, 
+                 test_agent, tracking_agent, default_requirements: str):
         """
         Store workflow dependencies so we can re-run the pipeline on each button press.
         """

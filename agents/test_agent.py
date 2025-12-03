@@ -88,10 +88,3 @@ class TestAgent:
 			return match.group(1).strip()
 
 		return response_text
-	
-# test methods
-# (include test code from code_agent)
-# test_agent = TestAgent(mcp_client, tracker)
-# tests = test_agent.generate_tests(app_code)
-# test_agent.save_tests_to_file(tests)
-# RUN TEST CASES: python -m generated_tests.test_generated_app

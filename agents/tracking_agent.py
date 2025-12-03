@@ -44,12 +44,3 @@ class TrackingAgent:
 		"""
 		with open(self.file_path, "w") as file:
 			json.dump(self.data, file, indent=4)
-
-# test methods
-# mcp = MCPClient()
-# output = mcp.call_model("Write a Python function that adds two numbers.")
-# print(output)
-# tracking = TrackingAgent()
-# tracking.record_agent_call("input_agent", output) #input bc the method called is from input_agent
-# tracking.save_report()
-

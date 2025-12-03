@@ -46,15 +46,3 @@ class InputAgent:
 			raise ValueError(f"LLM output is not valid JSON: {output_text}")
 
 		return {"requirements": requirements_dict}
-
-# test methods (copy into main.py)
-# mcp_client = MCPClient()
-# input = InputAgent(mcp_client)
-# raw_text = """
-# The app should allow users to create an account using their email and password. 
-# Users must be able to log in and log out securely. 
-# There should be a password reset functionality via email. 
-# The main dashboard should display user statistics like number of logins and recent activity. 
-# The system should provide notifications for important events like messages or updates.
-# """
-# print(input.parse_requirements(raw_text))

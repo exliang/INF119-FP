@@ -86,8 +86,7 @@ def run_workflow(reqs: str, input_agent: InputAgent, code_agent: CodeAgent,
 
 
 def main():
-    reqs = """ 
-    """
+    reqs = """""" #empty initial reqs so user can input it
     
     # Initialize MCP server & set tools
     mcp_server = MCPServer()
@@ -102,14 +101,7 @@ def main():
     test_agent = TestAgent(mcp_server, tracker)
 
 	# Launch UI (workflow runs on-demand from the Gradio callback)
-    ui = UI(
-        run_workflow,
-        input_agent,
-        code_agent,
-        test_agent,
-        tracker,
-        reqs
-    )
+    ui = UI(run_workflow, input_agent, code_agent, test_agent, tracker, reqs)
     ui.launch_ui()
 
 
