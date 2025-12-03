@@ -1,35 +1,55 @@
-# Authors: Emily Liang 79453973, Angie Xetey 44067973
+# Authors: Emily Liang 79453973, Angie Xetey 44067973,Kaomi Booker 85786904
 # Purpose: Creates a user interface for users to submit requirements for the app & receive the generated code and tests
 
 import gradio as gr 
 import json
+from typing import Callable
 
 class UI:
-    def __init__(self, results):
+    def __init__(
+        self,
+        workflow_runner: Callable,
+        input_agent,
+        code_agent,
+        test_agent,
+        tracking_agent,
+        default_requirements: str
+    ):
         """
-        Store results from running the workflow.
+        Store workflow dependencies so we can re-run the pipeline on each button press.
         """
-        self.parsed_reqs = results["parsed_requirements"]
-        self.generated_code = results["generated_code"]
-        self.generated_tests = results["generated_tests"]
-        self.test_summary = results["test_summary"]
-        self.test_output= results["test_output"]
-        self.usage_report = results["usage_report"]
+        self.workflow_runner = workflow_runner
+        self.input_agent = input_agent
+        self.code_agent = code_agent
+        self.test_agent = test_agent
+        self.tracking_agent = tracking_agent
+        self.default_requirements = default_requirements.strip()
+    
+    def _run_workflow_with_requirements(self, requirements_text: str):
+        """
+        Helper invoked by the UI button click to drive the agents and format the response.
+        """
+        requirements = requirements_text.strip() or self.default_requirements
+        results = self.workflow_runner(
+            requirements,
+            self.input_agent,
+            self.code_agent,
+            self.test_agent,
+            self.tracking_agent
+        )
+        return (
+            json.dumps(results["parsed_requirements"], indent=4),
+            results["generated_code"],
+            results["generated_tests"],
+            results["test_summary"],
+            results["test_output"],
+            json.dumps(results["usage_report"], indent=4)
+        )
     
     def launch_ui(self) -> None:
         """
         Method to launch the UI for user interaction.
         """
-        def show_results():
-            # Return stored results formatted for display
-            return (
-                json.dumps(self.parsed_reqs, indent=4),
-                self.generated_code,
-                self.generated_tests,
-                self.test_summary,
-                self.test_output,
-                json.dumps(self.usage_report, indent=4)
-            )
        
         # used a Gradio interface (simpler to implement)
         with gr.Blocks(title="Cyber Defender") as demo:
@@ -61,7 +81,8 @@ class UI:
                     requirements_box = gr.Textbox(
                             lines=10,
                             label="Requirements",
-                            placeholder="Describe the system you want to build..."
+                            placeholder="Describe the system you want to build...",
+                            value=self.default_requirements
                         )
                     run_button = gr.Button(" Run Cyber Defender")
 
@@ -91,8 +112,8 @@ class UI:
                     out_tracking = gr.Code()
                     
             run_button.click(
-                show_results,
-                inputs=[],
+                self._run_workflow_with_requirements,
+                inputs=[requirements_box],
                 outputs=[out_structured, out_code, out_tests, out_summary, out_results, out_tracking]
             )
 
