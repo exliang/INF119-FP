@@ -5,7 +5,7 @@ from agents.input_agent import InputAgent
 from agents.code_agent import CodeAgent
 from agents.test_agent import TestAgent
 from agents.tracking_agent import TrackingAgent
-from client.mcp_client import MCPClient
+from server.mcp_server import MCPServer
 from gui.ui import UI
 import sys, subprocess, re
 
@@ -94,20 +94,23 @@ def main():
     of user data. It also includes a password manager and encryption feature to enhance data protection.
     """
     
-    # Initialize MCP client & tracker
-    mcp_client = MCPClient()
-    tracker = TrackingAgent()
+    # Initialize MCP server & set tools
+    mcp_server = MCPServer()
+    mcp_server.set_tools("input_agent", "parse_requirements")
+    mcp_server.set_tools("code_agent", "generate_code")
+    mcp_server.set_tools("test_agent", "generate_tests")
 
-    # Initialize agents
-    input_agent = InputAgent(mcp_client, tracker)
-    code_agent = CodeAgent(mcp_client, tracker)
-    test_agent = TestAgent(mcp_client, tracker)
+    # Initialize tracker & agents 
+    tracker = TrackingAgent()
+    input_agent = InputAgent(mcp_server, tracker)
+    code_agent = CodeAgent(mcp_server, tracker)
+    test_agent = TestAgent(mcp_server, tracker)
 
 	# run workflow
-    resuts = run_workflow(reqs, input_agent, code_agent, test_agent, tracker)
+    results = run_workflow(reqs, input_agent, code_agent, test_agent, tracker)
 
     # Launch UI
-    ui = UI(resuts)
+    ui = UI(results)
     ui.launch_ui()
 
 

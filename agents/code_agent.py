@@ -6,8 +6,8 @@ import os
 import re
 
 class CodeAgent:
-	def __init__(self, mcp_client, usage_tracker):
-		self.mcp = mcp_client
+	def __init__(self, mcp_server, usage_tracker):
+		self.mcp_server = mcp_server
 		self.usage_tracker = usage_tracker
 	
 	def generate_code(self, structured_reqs: dict) -> str:
@@ -35,7 +35,7 @@ class CodeAgent:
 			"Expect the module to be saved directly to disk and imported by a test runner."
 		)
 
-		mcp_output = self.mcp.call_model(prompt)
+		mcp_output = self.mcp_server.call_tool("code_agent", "generate_code", prompt)
 
 		# track agent call
 		self.usage_tracker.record_agent_call("code_agent", mcp_output)

@@ -5,8 +5,8 @@ import os
 import re
 
 class TestAgent:
-	def __init__(self, mcp_client, usage_tracker):
-		self.mcp = mcp_client
+	def __init__(self, mcp_server, usage_tracker):
+		self.mcp_server = mcp_server
 		self.usage_tracker = usage_tracker
 	
 	def generate_tests(self, code_text: str) -> str:
@@ -36,13 +36,13 @@ class TestAgent:
 			"password manager operations, and encryption/decryption.\n"
 			"- File must be self-contained and runnable.\n"
 			"- Add a top comment: '# Run with: python testing.py'\n"
-			"- Import the module under test using: 'from generated_code import generated_app'\n\n"
+			"- IMPORTANT: Import the module under test using: 'from generated_code import generated_app'\n\n"
 			"Module under test:\n"
 			f"{code_text}\n"
 		)
 
 		# get prompt response & track agent usage
-		mcp_output = self.mcp.call_model(prompt)
+		mcp_output = self.mcp_server.call_tool("test_agent", "generate_tests", prompt)
 		self.usage_tracker.record_agent_call("test_agent", mcp_output)
 		self.usage_tracker.save_report()
 

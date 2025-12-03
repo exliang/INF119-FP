@@ -1,107 +1,76 @@
 import json
-import logging
 import random
 import time
-from cryptography.fernet import Fernet  # This is an external package
-
-# Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+from typing import List, Dict
 
 class CyberDefender:
     def __init__(self):
+        """Initialize the CyberDefender application."""
+        self.system_logs = []
+        self.network_traffic = []
         self.alerts = []
-        self.user_data = {}
+        self.passwords = {}
         self.encryption_key = self.generate_encryption_key()
-        self.fernet = Fernet(self.encryption_key)
 
-    def generate_encryption_key(self):
-        """Generates a new key for encryption."""
-        return Fernet.generate_key()
+    def generate_encryption_key(self) -> str:
+        """Generate a simple encryption key."""
+        return str(random.randint(100000, 999999))
 
-    def encrypt_data(self, data):
-        """
-        Encrypts data using Fernet symmetric encryption.
-        
-        :param data: The data to encrypt.
-        :return: The encrypted data.
-        """
-        return self.fernet.encrypt(data.encode())
+    def log_system_activity(self, activity: str) -> None:
+        """Log a system activity."""
+        self.system_logs.append(activity)
 
-    def decrypt_data(self, encrypted_data):
-        """
-        Decrypts data using Fernet symmetric encryption.
-        
-        :param encrypted_data: The data to decrypt.
-        :return: The decrypted data.
-        """
-        return self.fernet.decrypt(encrypted_data).decode()
+    def monitor_network_traffic(self) -> None:
+        """Monitor network traffic and log potential threats."""
+        for _ in range(5):  # Simulating monitoring
+            traffic = random.choice(['normal', 'malicious'])
+            self.network_traffic.append(traffic)
+            self.log_system_activity(f"Network traffic: {traffic}")
+            self.detect_threats(traffic)
+            time.sleep(1)
 
-    def monitor_network_traffic(self):
-        """Simulate monitoring of network traffic."""
-        logging.info("Monitoring network traffic...")
-        time.sleep(2)  # Simulate delay
-        suspicious_activity = random.choice([True, False])
-        if suspicious_activity:
-            self.handle_alert("Suspicious activity detected in network traffic.")
+    def detect_threats(self, traffic: str) -> None:
+        """Detect potential threats in the network traffic."""
+        if traffic == 'malicious':
+            self.alerts.append("Threat detected: malicious network traffic.")
+            self.neutralize_threat()
 
-    def monitor_system_logs(self):
-        """Simulate monitoring of system logs."""
-        logging.info("Monitoring system logs...")
-        time.sleep(2)  # Simulate delay
-        malware_detected = random.choice([True, False])
-        if malware_detected:
-            self.handle_alert("Malware detected in system logs.")
+    def neutralize_threat(self) -> None:
+        """Neutralize the detected threat."""
+        self.log_system_activity("Neutralizing threat.")
+        print("Threat has been neutralized!")
 
-    def handle_alert(self, message):
-        """
-        Handle a security alert by logging it and taking action.
-        
-        :param message: The alert message.
-        """
-        logging.warning(message)
-        self.alerts.append(message)
-        self.take_action(message)
+    def alert_user(self) -> None:
+        """Alert the user about detected threats."""
+        for alert in self.alerts:
+            print(f"ALERT: {alert}")
 
-    def take_action(self, message):
-        """Take necessary actions based on the alert message."""
-        logging.info("Taking action for alert: {}".format(message))
+    def store_password(self, service: str, password: str) -> None:
+        """Store a password securely."""
+        self.passwords[service] = self.encrypt_password(password)
 
-    def add_user_data(self, username, password):
-        """
-        Adds user credentials and encrypts them.
-        
-        :param username: The user's username.
-        :param password: The user's password.
-        """
-        encrypted_password = self.encrypt_data(password)
-        self.user_data[username] = encrypted_password
-        logging.info(f"Password for {username} stored securely.")
+    def encrypt_password(self, password: str) -> str:
+        """Encrypt a password using a simplistic method."""
+        encrypted = ''.join(chr(ord(char) + len(self.encryption_key)) for char in password)
+        return encrypted
 
-    def retrieve_password(self, username):
-        """
-        Retrieves and decrypts the user's password.
-        
-        :param username: The user's username.
-        :return: The decrypted password.
-        """
-        encrypted_password = self.user_data.get(username)
-        if encrypted_password:
-            return self.decrypt_data(encrypted_password)
-        else:
-            logging.error("Username not found.")
-            return None
+    def retrieve_password(self, service: str) -> str:
+        """Retrieve a stored password after decryption."""
+        if service in self.passwords:
+            return self.decrypt_password(self.passwords[service])
+        return "Service not found."
 
-    def run(self):
-        """Executes the monitoring process."""
-        while True:
-            self.monitor_network_traffic()
-            self.monitor_system_logs()
-            time.sleep(10)  # Run monitoring every 10 seconds
+    def decrypt_password(self, encrypted: str) -> str:
+        """Decrypt an encrypted password."""
+        decrypted = ''.join(chr(ord(char) - len(self.encryption_key)) for char in encrypted)
+        return decrypted
+
+    def run(self) -> None:
+        """Run the CyberDefender application."""
+        print("CyberDefender is running...")
+        self.monitor_network_traffic()
+        self.alert_user()
 
 if __name__ == "__main__":
-    cyber_defender = CyberDefender()
-    cyber_defender.add_user_data("user1", "secure_password_123")
-    password = cyber_defender.retrieve_password("user1")
-    if password:
-        logging.info(f"Retrieved password for user1: {password}")
-    cyber_defender.run()
+    defender = CyberDefender()
+    defender.run()
