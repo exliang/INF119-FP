@@ -1,78 +1,69 @@
 import json
-import logging
-import threading
+import os
 import time
-import random
-import string
+import sys
+import threading
+from cryptography.fernet import Fernet
 
 class CyberDefender:
     def __init__(self):
-        self.network_traffic = []
-        self.system_logs = []
+        self.logs = []
         self.alerts = []
+        self.encryption_key = self.generate_key()
         self.passwords = {}
-        self.running = True
-        logging.basicConfig(level=logging.INFO)
+
+    def generate_key(self):
+        return Fernet.generate_key()
+
+    def encrypt_data(self, data):
+        fernet = Fernet(self.encryption_key)
+        return fernet.encrypt(data.encode())
+
+    def decrypt_data(self, encrypted_data):
+        fernet = Fernet(self.encryption_key)
+        return fernet.decrypt(encrypted_data).decode()
 
     def monitor_traffic(self):
-        while self.running:
-            traffic = self.simulate_network_traffic()
-            self.network_traffic.append(traffic)
-            self.detect_threats(traffic)
-            time.sleep(2)
+        while True:
+            # Simulate network traffic monitoring
+            time.sleep(5)
+            self.detect_threat("Simulated threat detected!")
 
-    def simulate_network_traffic(self):
-        return {
-            "source": f"{random.randint(1, 255)}.{random.randint(0, 255)}.{random.randint(0, 255)}.{random.randint(0, 255)}",
-            "destination": f"{random.randint(1, 255)}.{random.randint(0, 255)}.{random.randint(0, 255)}.{random.randint(0, 255)}",
-            "data": ''.join(random.choices(string.ascii_letters + string.digits, k=10)),
-        }
+    def detect_threat(self, threat):
+        self.alerts.append(threat)
+        self.take_action(threat)
+        self.log_event(threat)
 
-    def detect_threats(self, traffic):
-        if "malware" in traffic["data"]:
-            self.alert_user(f"Threat detected from {traffic['source']}!")
-            self.neutralize_threat(traffic)
+    def take_action(self, threat):
+        print(f"Action taken against: {threat}")
 
-    def alert_user(self, message):
-        logging.info(message)
-        self.alerts.append(message)
+    def log_event(self, event):
+        self.logs.append(event)
+        print(f"Logged event: {event}")
 
-    def neutralize_threat(self, traffic):
-        logging.info(f"Neutralizing threat from {traffic['source']}.")
+    def alert_user(self):
+        for alert in self.alerts:
+            print(f"Alert: {alert}")
 
-    def add_password(self, name, password):
-        if not self.validate_password(password):
-            raise ValueError("Password does not meet security criteria.")
-        self.passwords[name] = self.encrypt_password(password)
+    def add_password(self, service, password):
+        encrypted_password = self.encrypt_data(password)
+        self.passwords[service] = encrypted_password
 
-    def validate_password(self, password):
-        return len(password) >= 8 and any(c.isdigit() for c in password)
+    def get_password(self, service):
+        if service in self.passwords:
+            return self.decrypt_data(self.passwords[service])
+        raise ValueError("Password not found for the requested service.")
 
-    def encrypt_password(self, password):
-        return ''.join(chr(ord(c) + 1) for c in password)
+    def save_logs(self, filename):
+        with open(filename, 'w') as f:
+            json.dump(self.logs, f)
 
-    def stop(self):
-        self.running = False
+    def start(self):
+        thread = threading.Thread(target=self.monitor_traffic)
+        thread.start()
+        print("Monitoring started.")
 
-def main():
-    defender = CyberDefender()
-    
-    traffic_monitor_thread = threading.Thread(target=defender.monitor_traffic)
-    traffic_monitor_thread.start()
-
-    # Simulate adding passwords
-    try:
-        defender.add_password("email", "password123")
-    except ValueError as e:
-        logging.error(e)
-
-    time.sleep(10)  # Run for 10 seconds
-    defender.stop()
-    traffic_monitor_thread.join()
-    
-    # Save alerts to a file
-    with open('alerts.json', 'w') as f:
-        json.dump(defender.alerts, f)
 
 if __name__ == "__main__":
-    main()
+    defender = CyberDefender()
+    defender.start()

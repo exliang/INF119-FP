@@ -55,10 +55,3 @@ class MCPClient:
                 "tokens": 0,
                 "response": ""
             }
-
-# test methods
-# mcp = MCPClient()
-# res = mcp.call_model("Write a Python function that adds two numbers.")
-# print(res)
-# """{'model': 'gpt-4o-mini', 'tokens': 117, 
-# 'response': 'Sure! Here is a simple Python function that adds two numbers:\n\n```python\ndef add_numbers(num1, num2):\n    return num1 + num2\n\n# Example usage:\nresult = add_numbers(5, 3)\nprint("The sum is:", result)  # Output: The sum is: 8\n```\n\nYou can call the `add_numbers` function with two numbers as arguments, and it will return their sum.'}"""

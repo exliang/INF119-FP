@@ -1,14 +1,14 @@
 {
     "input_agent": {
-        "numApiCalls": 23,
-        "totalTokens": 6478
+        "numApiCalls": 2,
+        "totalTokens": 549
     },
     "code_agent": {
-        "numApiCalls": 22,
-        "totalTokens": 18620
+        "numApiCalls": 2,
+        "totalTokens": 1359
     },
     "test_agent": {
-        "numApiCalls": 22,
-        "totalTokens": 30582
+        "numApiCalls": 2,
+        "totalTokens": 2202
     }
 }

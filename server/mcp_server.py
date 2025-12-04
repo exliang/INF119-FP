@@ -5,6 +5,7 @@ from client.mcp_client import MCPClient
 
 class MCPServer:
 	def __init__(self, api_key=None):
+		"""Initializes the mcp server with the mcp client & default tools"""
 		self.client = MCPClient(api_key=api_key)
 		self.tools = {"input_agent": "", "code_agent": "", "test_agent": ""} #{agent_name: tool}
 

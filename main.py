@@ -86,7 +86,8 @@ def run_workflow(reqs: str, input_agent: InputAgent, code_agent: CodeAgent,
 
 
 def main():
-    reqs = """""" #empty initial reqs so user can input it
+    """Entry point for cyberdefender system"""
+    reqs = """"""  # empty initial reqs so user can input it
     
     # Initialize MCP server & set tools
     mcp_server = MCPServer()

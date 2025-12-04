@@ -5,6 +5,7 @@ import json, re
 
 class InputAgent:
 	def __init__(self, mcp_server, usage_tracker):
+		"""Initializes mcp server & usage tracker"""
 		self.mcp_server = mcp_server
 		self.usage_tracker = usage_tracker
 
