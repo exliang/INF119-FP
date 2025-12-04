@@ -26,9 +26,10 @@ class TrackingAgent:
 		# update self.data with which agent, numApiCalls, & totalTokens
 		total_tokens = mcp_output["tokens"]
 
-		if agent_name not in self.data:
+		if agent_name not in self.data: # if agent not dict, add it
 			self.data[agent_name] = {"numApiCalls": 0, "totalTokens": 0}
 		
+		# increase token count & api call count
 		self.data[agent_name]["numApiCalls"] += 1
 		self.data[agent_name]["totalTokens"] += total_tokens
 

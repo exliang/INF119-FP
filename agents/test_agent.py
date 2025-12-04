@@ -29,7 +29,6 @@ class TestAgent:
 			"that tests the provided module.\n\n"
 			"REQUIREMENTS:\n"
 			"- Output ONLY valid Python code (NO markdown, NO backticks).\n"
-			"- Import the module under test using: import generated_app\n"
 			"- Use Python's unittest framework.\n"
 			"- Include AT LEAST 10 distinct test methods.\n"
 			"- Tests must be deterministic (no external I/O, no randomness unless seeded).\n"

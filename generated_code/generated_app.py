@@ -1,69 +1,84 @@
 import json
-import os
-import time
-import sys
+import logging
 import threading
+import time
+from collections import deque
 from cryptography.fernet import Fernet
+
 
 class CyberDefender:
     def __init__(self):
-        self.logs = []
+        self.network_traffic = deque(maxlen=100)
+        self.system_logs = deque(maxlen=100)
         self.alerts = []
-        self.encryption_key = self.generate_key()
-        self.passwords = {}
+        self.is_running = True
+        self.lock = threading.Lock()
+        self.password_manager = {}
+        self.key = Fernet.generate_key()
+        self.fernet = Fernet(self.key)
+        logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-    def generate_key(self):
-        return Fernet.generate_key()
+    def monitor_network_traffic(self):
+        """Monitor network traffic for suspicious activities."""
+        while self.is_running:
+            # Simulated network traffic monitoring
+            self.network_traffic.append("Traffic event")
+            if len(self.network_traffic) > 95:  # Placeholder condition for threat detection
+                self.alerts.append("Suspicious network activity detected!")
+                self.take_action()
+            time.sleep(1)
 
-    def encrypt_data(self, data):
-        fernet = Fernet(self.encryption_key)
-        return fernet.encrypt(data.encode())
+    def monitor_system_logs(self):
+        """Monitor system logs for security breaches."""
+        while self.is_running:
+            # Simulated log monitoring
+            self.system_logs.append("Log event")
+            if len(self.system_logs) > 95:  # Placeholder condition for security breach
+                self.alerts.append("Potential security breach detected!")
+                self.take_action()
+            time.sleep(1)
 
-    def decrypt_data(self, encrypted_data):
-        fernet = Fernet(self.encryption_key)
-        return fernet.decrypt(encrypted_data).decode()
+    def take_action(self):
+        """Take actions to neutralize threats."""
+        with self.lock:
+            while self.alerts:
+                alert = self.alerts.pop(0)
+                logging.warning(alert)
+                # Placeholder for actions taken against threats
+                logging.info("Taking action to neutralize the threat.")
 
-    def monitor_traffic(self):
-        while True:
-            # Simulate network traffic monitoring
-            time.sleep(5)
-            self.detect_threat("Simulated threat detected!")
-
-    def detect_threat(self, threat):
-        self.alerts.append(threat)
-        self.take_action(threat)
-        self.log_event(threat)
-
-    def take_action(self, threat):
-        print(f"Action taken against: {threat}")
-
-    def log_event(self, event):
-        self.logs.append(event)
-        print(f"Logged event: {event}")
-
-    def alert_user(self):
-        for alert in self.alerts:
-            print(f"Alert: {alert}")
+    def stop(self):
+        """Stop the CyberDefender monitoring."""
+        self.is_running = False
+        logging.info("CyberDefender has been stopped.")
 
     def add_password(self, service, password):
-        encrypted_password = self.encrypt_data(password)
-        self.passwords[service] = encrypted_password
+        """Store a password securely using encryption."""
+        encrypted_password = self.fernet.encrypt(password.encode())
+        self.password_manager[service] = encrypted_password
+        logging.info(f"Password for {service} has been securely stored.")
 
     def get_password(self, service):
-        if service in self.passwords:
-            return self.decrypt_data(self.passwords[service])
-        raise ValueError("Password not found for the requested service.")
+        """Retrieve a password securely using decryption."""
+        try:
+            encrypted_password = self.password_manager[service]
+            return self.fernet.decrypt(encrypted_password).decode()
+        except KeyError:
+            logging.error("The service does not exist in the password manager.")
+            return None
 
-    def save_logs(self, filename):
-        with open(filename, 'w') as f:
-            json.dump(self.logs, f)
-
-    def start(self):
-        thread = threading.Thread(target=self.monitor_traffic)
-        thread.start()
-        print("Monitoring started.")
+    def run(self):
+        """Start monitoring network traffic and system logs."""
+        logging.info("CyberDefender is starting...")
+        threading.Thread(target=self.monitor_network_traffic, daemon=True).start()
+        threading.Thread(target=self.monitor_system_logs, daemon=True).start()
 
 
 if __name__ == "__main__":
     defender = CyberDefender()
-    defender.start()
+    defender.run()
+    try:
+        while True:
+            time.sleep(1)
+    except KeyboardInterrupt:
+        defender.stop()

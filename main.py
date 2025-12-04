@@ -61,15 +61,18 @@ def run_workflow(reqs: str, input_agent: InputAgent, code_agent: CodeAgent,
 
     # Computes the total amount of tests passed
     passed = total - failed - errors
+    passed_percentage = (passed / total) * 100 if total > 0 else 0
+    pass_threshold_met = total >= 10 and passed_percentage >= 80
 
     summary_md = f"""
-	### Test Summary
-	- **Total tests:** {total}
-	- **Passed:** {passed}
-	- **Failed:** {failed}
-	- **Errors:** {errors}
-	- **Status:** {"Pass threshold met (≥8)" if passed >= 8 else "Not enough passing tests"}
-	"""
+    ### Test Summary
+    - **Total tests:** {total}
+    - **Passed:** {passed}
+    - **Failed:** {failed}
+    - **Errors:** {errors}
+    - **Pass Rate:** {passed_percentage:.1f}%
+    - **Status:** {"Pass threshold met" if pass_threshold_met else "Threshold not met"}
+    """
 
     # Get usage report (only need to save one used from demo)
     usage_report = tracking_agent.get_report()

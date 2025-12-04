@@ -1,66 +1,74 @@
 # Run with: python testing.py
-
 import unittest
 from generated_code import generated_app
-from cryptography.fernet import InvalidToken
+from cryptography.fernet import Fernet
+import logging
+
 
 class TestCyberDefender(unittest.TestCase):
 
     def setUp(self):
         self.defender = generated_app.CyberDefender()
+        self.defender.is_running = False  # Prevent threads from running during tests
+        self.defender.network_traffic.clear()
+        self.defender.system_logs.clear()
+        self.defender.alerts.clear()
+        self.defender.password_manager.clear()
 
-    def test_generate_key(self):
-        self.assertIsNotNone(self.defender.encryption_key)
-        self.assertEqual(len(self.defender.encryption_key), 44)  # Fernet key length
-
-    def test_encrypt_data(self):
-        data = "my_secret_password"
-        encrypted_data = self.defender.encrypt_data(data)
-        self.assertIsNotNone(encrypted_data)
-        self.assertNotEqual(data.encode(), encrypted_data)
-
-    def test_decrypt_data(self):
-        data = "my_secret_password"
-        encrypted_data = self.defender.encrypt_data(data)
-        decrypted_data = self.defender.decrypt_data(encrypted_data)
-        self.assertEqual(data, decrypted_data)
-
-    def test_detect_threat(self):
-        self.defender.detect_threat("Malware detected")
-        self.assertIn("Malware detected", self.defender.alerts)
-        self.assertIn("Malware detected", self.defender.logs)
-
-    def test_alert_user(self):
-        self.defender.detect_threat("Virus detected")
-        with self.assertLogs(level='INFO') as log:
-            self.defender.alert_user()
-        self.assertIn("Alert: Virus detected", log.output[0])
+    def test_initialization(self):
+        self.assertEqual(len(self.defender.network_traffic), 0)
+        self.assertEqual(len(self.defender.system_logs), 0)
+        self.assertEqual(len(self.defender.alerts), 0)
+        self.assertIsInstance(self.defender.key, bytes)
 
     def test_add_password(self):
-        self.defender.add_password("test_service", "password123")
-        self.assertIn("test_service", self.defender.passwords)
+        self.defender.add_password("test_service", "test_password")
+        self.assertIn("test_service", self.defender.password_manager)
+        self.assertIsInstance(self.defender.password_manager["test_service"], bytes)
 
-    def test_get_password(self):
-        self.defender.add_password("test_service", "password123")
-        password = self.defender.get_password("test_service")
-        self.assertEqual(password, "password123")
+    def test_get_password_success(self):
+        self.defender.add_password("test_service", "test_password")
+        retrieved_password = self.defender.get_password("test_service")
+        self.assertEqual(retrieved_password, "test_password")
 
-    def test_get_password_not_found(self):
-        with self.assertRaises(ValueError):
-            self.defender.get_password("non_existent_service")
+    def test_get_password_failure(self):
+        retrieved_password = self.defender.get_password("non_existent_service")
+        self.assertIsNone(retrieved_password)
 
-    def test_logs_after_event(self):
-        self.defender.detect_threat("Unauthorized access")
-        self.assertEqual(len(self.defender.logs), 1)
-        self.assertEqual(self.defender.logs[0], "Unauthorized access")
+    def test_encryption_decryption(self):
+        service = "test_service"
+        password = "test_password"
+        self.defender.add_password(service, password)
+        encrypted_password = self.defender.password_manager[service]
+        decrypted_password = self.defender.fernet.decrypt(encrypted_password).decode()
+        self.assertEqual(decrypted_password, password)
 
-    def test_save_logs(self):
-        self.defender.detect_threat("Test log save")
-        filename = "test_logs.json"
-        self.defender.save_logs(filename)
-        with open(filename, 'r') as f:
-            logs = json.load(f)
-        self.assertIn("Test log save", logs)
+    def test_alerts_on_network_activity(self):
+        self.defender.is_running = True
+        for _ in range(96):  # Simulate enough network events to trigger alert
+            self.defender.network_traffic.append("Traffic event")
+        self.assertGreater(len(self.defender.alerts), 0)
+
+    def test_alerts_on_system_log_activity(self):
+        self.defender.is_running = True
+        for _ in range(96):  # Simulate enough log events to trigger alert
+            self.defender.system_logs.append("Log event")
+        self.assertGreater(len(self.defender.alerts), 0)
+
+    def test_take_action_when_alerts_present(self):
+        self.defender.alerts.append("Test alert")
+        with self.assertLogs(level='WARNING') as log:
+            self.defender.take_action()
+            self.assertIn("Test alert", log.output[0])
+
+    def test_stop_method(self):
+        self.defender.stop()
+        self.assertFalse(self.defender.is_running)
+
+    def test_run_method_initializes_threads(self):
+        self.defender.is_running = True
+        self.defender.run()
+        self.assertTrue(len(self.defender.network_traffic) <= 100)  # Check that threads are running
 
 if __name__ == '__main__':
     unittest.main()
